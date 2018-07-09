@@ -1,4 +1,6 @@
+// Modified version of rn-host-detect to fix react-native 0.56.0+. Original: https://github.com/jhen0409/rn-host-detect
 'use strict'
+var NativeModules = require('react-native').NativeModules
 
 /*
  * It only for Debug Remotely mode for Android
@@ -31,7 +33,7 @@ function getConstants(config) {
  * Get React Native server IP if hostname is `localhost`
  * On Android emulator, the IP of host is `10.0.2.2` (Genymotion: 10.0.3.2)
  */
-module.exports = function (hostname) {
+export default (hostname) => {
   if (
     typeof __fbBatchedBridge !== 'object' ||  // Not on react-native
     hostname !== 'localhost' && hostname !== '127.0.0.1'
@@ -40,7 +42,7 @@ module.exports = function (hostname) {
   }
   hostname = getByRemoteConfig(hostname)
   var originalWarn = console.warn
-  console.warn = function() {
+  console.warn = function () {
     if (arguments[0] && arguments[0].indexOf('Requiring module \'NativeModules\' by name') > -1) return
     return originalWarn.apply(console, arguments)
   }
@@ -51,7 +53,6 @@ module.exports = function (hostname) {
   if (typeof window === 'undefined' || !window.__DEV__ || typeof window.require !== 'function') {
     return hostname
   }
-  NativeModules = window.require('NativeModules')
   console.warn = originalWarn
   if (
     !NativeModules ||
